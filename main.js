@@ -23,6 +23,7 @@ function findTerminalCommand() {
     //ask the ai the command to execute a terminal function
     //return the command
     input.question("Prompt: ", async (query) => {
+        query = query + ". Platform: " + os.platform();
         
         let apiRequest = {
             "messages": [
@@ -87,8 +88,8 @@ function findTerminalCommand() {
                 return;
             }
             else{
-                console.log(command.function_call.arguments.action);
-                executeTerminalCommand(command.function_call.arguments.action);
+                console.log(command.function_call.arguments.action + " " + command.function_call.arguments.target);
+                executeTerminalCommand(command.function_call.arguments.action+ " " + command.function_call.arguments.target);
                 findTerminalCommand();
             }
             // executeTerminalCommand(command.arguments.action + " " + command.arguments.target);
