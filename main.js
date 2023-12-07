@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 
+import os from 'os';
+
 import readline from 'readline';
 
 dotenv.config();
@@ -17,6 +19,7 @@ const input = readline.createInterface({
 });
 
 function findTerminalCommand() {
+    
     //ask the ai the command to execute a terminal function
     //return the command
     input.question("Prompt: ", async (query) => {
@@ -42,17 +45,17 @@ function findTerminalCommand() {
                             "action": {
                                 "title": "action",
                                 "type": "string",
-                                "description": "The action to perform on the terminal, e.g. make a directory, remove a file, etc."
+                                "description": "The name of the command to execute on the platform"
                             },
                             "target": {
                                 "title": "target",
                                 "type": "string",
-                                "description": "The target of the action, e.g. the name of the directory to make, the name of the file to remove, etc."
+                                "description": "Any required parameters for the action to be performed successfully, and according to the prompt"
                             },
                             "platform": {
                                 "title": "platform",
                                 "type": "string",
-                                "description": "The platform to execute the command on, e.g. Mac, Linux, Windows, etc."
+                                "description": "The platform that is used to determine the command, e.g. Windows , mac , Linux , or the operating system that the command runs on. It should be found from the query."
                             }
                         }
                     },
@@ -70,7 +73,7 @@ function findTerminalCommand() {
         llamaAPI.runSync(apiRequest).then(response => {
             let choices = response.choices;
             let command = choices[0].message;
-            console.log(command);
+            console.log(JSON.stringify(command.function_call.arguments));
             if(!command.function_call.arguments.action){
                 console.log("No action found.");
                 findTerminalCommand();
@@ -84,8 +87,8 @@ function findTerminalCommand() {
                 return;
             }
             else{
-                console.log(command.function_call.arguments.action + " " + command.function_call.arguments.target);
-                executeTerminalCommand(command.function_call.arguments.action + " " + command.function_call.arguments.target);
+                console.log(command.function_call.arguments.action);
+                executeTerminalCommand(command.function_call.arguments.action);
                 findTerminalCommand();
             }
             // executeTerminalCommand(command.arguments.action + " " + command.arguments.target);
