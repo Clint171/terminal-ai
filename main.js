@@ -35,7 +35,7 @@ function findTerminalCommand() {
             "functions": [
                 {
                     "name": "find_terminal_command",
-                    "description": "Get the command to execute a terminal function. Return only the command.",
+                    "description": "Get the command to execute a terminal function. Return the command and any other arguments that may be needed to fulfil the command.",
                     "parameters": {
                         "type": "object",
                         "properties": {
