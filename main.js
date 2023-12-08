@@ -29,7 +29,7 @@ function findTerminalCommand() {
             "messages": [
                 {
                     "role" : "system",
-                    "content" : "You are a computer expert. You want to respond to prompts with the commands required to complete the task. You are given a prompt witn a task. You must respond with the command to complete the task."
+                    "content" : "You are a computer expert. You want to respond to prompts with the commands required to complete the task. You are given a prompt with a task. You must respond with the command to complete the task."
                 },
                 {
                     "role": "user",
@@ -46,7 +46,7 @@ function findTerminalCommand() {
                             "action": {
                                 "title": "action",
                                 "type": "string",
-                                "description": "The name of the command to execute on the platform"
+                                "description": "The name of the command to execute on the platform, including any flags if necessary"
                             },
                             "target": {
                                 "title": "target",
