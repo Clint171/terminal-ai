@@ -56,7 +56,6 @@ function findTerminalCommand() {
             messages.push(response.choices[0].message);
             findTerminalCommand();
         }).catch(error => {
-            console.log(error);
             messages.pop();
             findTerminalCommand();
         });
