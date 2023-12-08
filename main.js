@@ -18,89 +18,51 @@ const input = readline.createInterface({
     output: process.stdout
 });
 
+let messages = [
+    {
+        "role" : "system",
+        "content" : "You are a smart terminal. You respond only with shell scripts to execute queries. You do not use markdown formatting."
+    },
+    {
+        "role" : "user",
+        "content" : "How can you do a greeting?"
+    },
+    {
+        "role" : "assistant",
+        "content" : "echo 'Hi, how are you?'"
+    }
+]
+
+
 function findTerminalCommand() {
-    
-    //ask the ai the command to execute a terminal function
-    //return the command
     input.question("Prompt: ", async (query) => {
-        query = query + ". Platform: " + os.platform();
+        query = query + " Platform: " + os.platform();
+        messages.push({
+            "role" : "user",
+            "content" : query
+        })
         
         let apiRequest = {
-            "messages": [
-                {
-                    "role" : "system",
-                    "content" : "You are a computer expert. You want to respond to prompts with the commands required to complete the task. You are given a prompt with a task. You must respond with the command to complete the task."
-                },
-                {
-                    "role": "user",
-                    "content": query
-                }
-            ],
-            "functions": [
-                {
-                    "name": "find_terminal_command",
-                    "description": "Get the command to execute a terminal function. Return the command and any other arguments that may be needed to fulfil the command.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "action": {
-                                "title": "action",
-                                "type": "string",
-                                "description": "The name of the command to execute on the platform, including any flags if necessary"
-                            },
-                            "target": {
-                                "title": "target",
-                                "type": "string",
-                                "description": "Any required parameters for the action to be performed successfully, and according to the prompt"
-                            },
-                            "platform": {
-                                "title": "platform",
-                                "type": "string",
-                                "description": "The platform that is used to determine the command, e.g. Windows , mac , Linux , or the operating system that the command runs on. It should be found from the query."
-                            }
-                        }
-                    },
-                    "required": [
-                        "action",
-                        "target",
-                        "platform"
-                    ]
-                }
-            ],
-            "temperature": 1.0,
-            "stream": false,
-            "function_call": {"name" : "find_terminal_command"}
+            "messages": messages,
+            "temperature": 0.2,
+            "stream": false
         };
         llamaAPI.runSync(apiRequest).then(response => {
-            let choices = response.choices;
-            let command = choices[0].message;
-            console.log(JSON.stringify(command.function_call.arguments));
-            if(!command.function_call.arguments.action){
-                console.log("No action found.");
-                findTerminalCommand();
-                return;
+            let commands = response.choices[0].message.content.split("\n");
+            console.log(commands);
+            for(let i in commands){
+                executeTerminalCommand(commands[i]);
             }
-            if(!command.function_call.arguments.target){
-                console.log("No target found. Executing without target.");
-                console.log(command.function_call.arguments.action);
-                executeTerminalCommand(command.function_call.arguments.action);
-                findTerminalCommand();
-                return;
-            }
-            else{
-                console.log(command.function_call.arguments.action + " " + command.function_call.arguments.target);
-                executeTerminalCommand(command.function_call.arguments.action+ " " + command.function_call.arguments.target);
-                findTerminalCommand();
-            }
-            // executeTerminalCommand(command.arguments.action + " " + command.arguments.target);
+            messages.push(response.choices[0].message);
+            findTerminalCommand();
         }).catch(error => {
             console.log(error);
+            messages.pop();
             findTerminalCommand();
         });
     });
     
 }
-findTerminalCommand();
 
 function executeTerminalCommand(command) {
     //execute the command on the terminal
@@ -118,3 +80,5 @@ function executeTerminalCommand(command) {
         console.log(`stdout:\n${stdout}`);
     });
 }
+
+findTerminalCommand();
