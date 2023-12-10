@@ -21,42 +21,40 @@ const input = readline.createInterface({
 let messages = [
     {
         "role" : "system",
-        "content" : "You are a smart terminal. You respond only with shell scripts to execute queries. You do not use markdown formatting."
-    },
-    {
-        "role" : "user",
-        "content" : "How can you do a greeting?"
-    },
-    {
-        "role" : "assistant",
-        "content" : "echo 'Hi, how are you?'"
+        "content" : "You are a translator between natural language and terminal commands. You are communicating with a terminal that only understands and executes commands. You can ONLY respond with a string of commands in sequence that are ready to be executed as is. You will respond with all the commands required to achieve the goal given. Do not number the commands, as the terminal will throw an error."
     }
 ]
 
 
 function findTerminalCommand() {
     input.question("Prompt: ", async (query) => {
-        query = query + " Platform: " + os.platform();
-        messages.push({
+        query = query + " on platform " + os.platform();
+        let qmessages = messages
+        qmessages.push({
             "role" : "user",
             "content" : query
         })
         
         let apiRequest = {
-            "messages": messages,
-            "temperature": 0.2,
-            "stream": false
+            "messages": qmessages,
+            "temperature": 0.8,
+            "stream": false,
+            "max_tokens": 1024
         };
         llamaAPI.runSync(apiRequest).then(response => {
             let commands = response.choices[0].message.content.split("\n");
             console.log(commands);
             for(let i in commands){
+                if(commands[i] == '```' || commands[i] == ''){
+                    continue;
+                }
                 executeTerminalCommand(commands[i]);
             }
-            messages.push(response.choices[0].message);
             findTerminalCommand();
         }).catch(error => {
-            messages.pop();
+            if (error.status == 422) {
+                executeTerminalCommand("echo 'An error occured. Can we try something else?'");
+            }
             findTerminalCommand();
         });
     });
