@@ -21,7 +21,7 @@ const input = readline.createInterface({
 let messages = [
     {
         "role" : "system",
-        "content" : "You are a translator between natural language and terminal commands. You are communicating with a terminal that only understands and executes commands. You can ONLY respond with a string of commands in sequence that are ready to be executed as is. You will respond with all the commands required to achieve the goal given. Do not number the commands, as the terminal will throw an error."
+        "content" : "You are a translator between natural language and terminal commands. You are communicating with a terminal that only understands and executes commands. You can ONLY respond with a string of commands in sequence that are ready to be executed as is. You will respond with all the commands required to achieve the goal given. Do not number the commands, as the terminal will throw an error. If a path is not specified, always use the current directory. Do not explain anything,as the terminal does not understand anything other than commands."
     }
 ]
 
@@ -44,17 +44,10 @@ function findTerminalCommand() {
         llamaAPI.runSync(apiRequest).then(response => {
             let commands = response.choices[0].message.content.split("\n");
             console.log(commands);
-            for(let i in commands){
-                if(commands[i] == '```' || commands[i] == ''){
-                    continue;
-                }
-                executeTerminalCommand(commands[i]);
-            }
+            executeCommands(commands);
             findTerminalCommand();
         }).catch(error => {
-            if (error.status == 422) {
-                executeTerminalCommand("echo 'An error occured. Can we try something else?'");
-            }
+            executeTerminalCommand("echo 'An error occured. Can we try something else?'");
             findTerminalCommand();
         });
     });
@@ -79,3 +72,21 @@ function executeTerminalCommand(command) {
 }
 
 findTerminalCommand();
+
+function executeCommands(commands){
+    for(let i in commands){
+        exec(commands[i], (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+            }
+    
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                return;
+            }
+    
+            console.log(`stdout:\n${stdout}`);
+        });
+    }
+}
