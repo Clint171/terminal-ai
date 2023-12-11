@@ -39,7 +39,7 @@ function findTerminalCommand() {
             "messages": qmessages,
             "temperature": 0.8,
             "stream": false,
-            "max_tokens": 1024
+            "max_token": 1024
         };
         llamaAPI.runSync(apiRequest).then(response => {
             let commands = response.choices[0].message.content.split("\n");
