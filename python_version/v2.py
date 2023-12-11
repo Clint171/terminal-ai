@@ -63,10 +63,11 @@ def handle_prompt(query):
                     break
                 else:
                     print(f"Output:\n{stdout.decode('utf-8')}")
-                    messages.append({"role": "assistant", "content": commands})
 
             # If all commands succeed, find the next command
             else:
+                # messages.append({"role": "assistant", "content": commands})
+                # print(messages)
                 find_terminal_command()
         except Exception as error:
             print(f"An error occurred: {error}")
