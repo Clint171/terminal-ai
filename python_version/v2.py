@@ -62,7 +62,11 @@ def handle_prompt(query):
 
                 if proc.returncode != 0:
                     print(f"Error: {stderr.decode('utf-8')}")
-                    find_terminal_command()
+                    print("Retrying...")
+                    # remove last message
+                    messages.pop()
+                    # send error message to llama
+                    handle_prompt(command + " failed with the error message : " + stderr.decode('utf-8'))
                     break
                 else:
                     print(f"Output:\n{stdout.decode('utf-8')}")
