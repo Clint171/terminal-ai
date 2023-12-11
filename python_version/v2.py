@@ -54,6 +54,9 @@ def handle_prompt(query):
             print(commands)
             # Execute each command and stop if one fails
             for command in commands:
+                # check if contains "```" or '' and skip
+                if(command.find("```") != -1 or command.find("''") != -1):
+                    continue
                 proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = proc.communicate()
 
