@@ -36,50 +36,56 @@ messages = [
 ]
 
 def handle_prompt(query):
+    # If user wants to quit, exit the program
+    if query == "quit" or query == "exit":
+        sys.exit()
+    
+    # Add additional information to query.
+    # This is a hack to make the AI more accurate.
+    query = query + ", I am on platform " + sys.platform + " and my current directory is " + os.getcwd() + ". The current process id is " + str(os.getpid()) + "."
     # Add user query to message list
-        messages.append({"role": "user", "content": query})
+    messages.append({"role": "user", "content": query})
 
-        # Prepare API request
-        api_request = {
-            "messages": messages,
-            "temperature": 0.8,
-            "stream": False,
-            "max_token": 1024*4
-        }
+    # Prepare API request
+    api_request = {
+        "messages": messages,
+        "temperature": 0.3,
+        "stream": False,
+    }
 
-        # Send request to LlamaAI and process response
-        try:
-            response = llama_api.run(api_request)
-            commands = response.json()["choices"][0]["message"]["content"].split("\n")
-            print(commands)
-            # Execute each command and stop if one fails
-            for command in commands:
-                # check if contains "```" or '' and skip
-                if(command.find("```") != -1 or command.find("''") != -1):
-                    continue
-                proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-                stdout, stderr = proc.communicate()
+    # Send request to LlamaAI and process response
+    try:
+        response = llama_api.run(api_request)
+        commands = response.json()["choices"][0]["message"]["content"].split("\n")
+        print(commands)
+        # Execute each command and stop if one fails
+        for command in commands:
+            # check if contains "```" or '' and skip
+            if(command.find("```") != -1 or command.find("''") != -1):
+                continue
+            proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+            stdout, stderr = proc.communicate()
 
-                if proc.returncode != 0:
-                    print(f"Error: {stderr.decode('utf-8')}")
-                    print("Retrying...")
-                    # remove last message
-                    messages.pop()
-                    # send error message to llama
-                    handle_prompt(command + " failed with the error message : " + stderr.decode('utf-8'))
-                    break
-                else:
-                    print(f"Output:\n{stdout.decode('utf-8')}")
-
-            # If all commands succeed, find the next command
+            if proc.returncode != 0:
+                print(f"Error: {stderr.decode('utf-8')}")
+                print("Retrying...")
+                # remove last message
+                messages.pop()
+                # send error message to llama
+                handle_prompt(command + " failed with the error message : " + stderr.decode('utf-8'))
+                break
             else:
-                # messages.append({"role": "assistant", "content": commands})
-                # print(messages)
-                find_terminal_command()
-        except Exception as error:
-            print(f"An error occurred: {error}")
-            print(response.json())
+                print(f"Output:\n{stdout.decode('utf-8')}")
+
+        # If all commands succeed, find the next command
+        else:
+            # messages.append({"role": "assistant", "content": commands})
+            # print(messages)
             find_terminal_command()
+    except Exception as error:
+        print(f"An error occurred: {error}")
+        print(response.json())
+        find_terminal_command()
 
 
 
