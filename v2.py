@@ -99,3 +99,7 @@ def find_terminal_command():
 
 # Start the conversation loop
 find_terminal_command()
+
+def execute(query){
+    
+}
