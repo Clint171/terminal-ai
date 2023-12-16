@@ -100,6 +100,8 @@ def find_terminal_command():
 # Start the conversation loop
 find_terminal_command()
 
-def execute(query){
-    
-}
+def execute(command):
+    print(command)
+    proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+    stdout , stderr = proc.communicate()
+
