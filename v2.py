@@ -105,3 +105,5 @@ def execute(command):
     proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
     stdout , stderr = proc.communicate()
 
+# Need to use huawei ai, not llama
+
